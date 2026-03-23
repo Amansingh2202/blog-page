@@ -2,8 +2,7 @@ package com.axeno.core.servlets;
 
 import com.axeno.core.models.BlogRoot;
 import com.axeno.core.utils.GlobalObject;
-import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
@@ -14,7 +13,6 @@ import org.osgi.service.component.annotations.Component;
 import javax.servlet.Servlet;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 @Component(
         service = Servlet.class,
@@ -31,42 +29,65 @@ public class ReadBlogJsonServlet extends SlingSafeMethodsServlet {
             SlingHttpServletResponse response)
             throws IOException {
 
+        response.setContentType("application/json");
+
         try {
 
-
             if (GlobalObject.BlogRootObject != null) {
-                response.getWriter().write("JSON already loaded");
+
+                ObjectMapper mapper = new ObjectMapper();
+
+                response.getWriter().write(
+                        mapper.writeValueAsString(
+                                GlobalObject.BlogRootObject.getPages()
+                        )
+                );
                 return;
             }
+
 
             Resource jsonResource =
                     request.getResourceResolver()
                             .getResource("/content/dam/blogging/blogData.json");
 
             if (jsonResource == null) {
-                response.getWriter().write("JSON not found");
+                response.getWriter().write("{\"error\":\"JSON not found\"}");
                 return;
             }
 
             Resource original =
                     jsonResource.getChild("jcr:content/renditions/original");
 
-            assert original != null;
-            InputStream is =
-                    original.adaptTo(InputStream.class);
-            Gson gson=new Gson();
-
-            assert is != null;
-            String json =
-                    IOUtils.toString(is, StandardCharsets.UTF_8);
+            if (original == null) {
+                response.getWriter().write("{\"error\":\"Original rendition missing\"}");
+                return;
+            }
 
 
-            GlobalObject.BlogRootObject = gson.fromJson(json, BlogRoot.class);
+            try (InputStream is = original.adaptTo(InputStream.class)) {
 
-            response.getWriter().write("JSON loaded successfully");
+                if (is == null) {
+                    response.getWriter().write("{\"error\":\"InputStream null\"}");
+                    return;
+                }
+
+                ObjectMapper mapper = new ObjectMapper();
+
+                BlogRoot root =
+                        mapper.readValue(is, BlogRoot.class);
+
+
+                GlobalObject.BlogRootObject = root;
+
+                response.getWriter().write(
+                        mapper.writeValueAsString(root.getPages())
+                );
+            }
 
         } catch (Exception e) {
-            response.getWriter().write("Error : " + e.getMessage());
+            response.getWriter().write(
+                    "{\"error\":\"" + e.getMessage() + "\"}"
+            );
         }
     }
 }

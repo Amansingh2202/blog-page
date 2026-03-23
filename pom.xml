@@ -511,6 +511,8 @@ Bundle-DocURL:
   <!-- D E P E N D E N C I E S -->
   <!-- ====================================================================== -->
   <dependencyManagement>
+
+
     <dependencies>
       <dependency>
         <groupId>com.adobe.aem</groupId>
@@ -518,6 +520,7 @@ Bundle-DocURL:
         <version>${aem.sdk.api}</version>
         <scope>provided</scope>
       </dependency>
+
 
       <dependency>
         <groupId>com.adobe.cq</groupId>
@@ -597,6 +600,7 @@ Bundle-DocURL:
         <version>1.0.1</version>
         <scope>test</scope>
       </dependency>
+
     </dependencies>
   </dependencyManagement>
 </project>
