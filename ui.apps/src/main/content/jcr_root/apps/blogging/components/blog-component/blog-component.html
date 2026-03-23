@@ -1,0 +1,35 @@
+<div class="blog-wrapper">
+
+    
+    <div class="blog-title">
+    <h3>Blog heading</h3>
+        <sly
+            data-sly-resource="${'title' @ resourceType='blogging/components/title'}">
+        </sly>
+    </div>
+
+    
+    <div class="blog-text">
+    <h3>content</h3>
+        <sly
+            data-sly-resource="${'content' @ resourceType='blogging/components/text'}">
+        </sly>
+    </div>
+
+  
+    <div class="author-name">
+    <h3>author name</h3>
+        <sly
+            data-sly-resource="${'authorName' @ resourceType='blogging/components/text'}">
+        </sly>
+    </div>
+
+    
+    <div class="author-bio">
+    <h3>author-bio</h3>
+        <sly
+            data-sly-resource="${'authorBio' @ resourceType='blogging/components/text'}">
+        </sly>
+    </div>
+
+</div>
