@@ -17,7 +17,7 @@ import java.io.InputStream;
 @Component(
         service = Servlet.class,
         property = {
-                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/readBlogJson",
+                ServletResolverConstants.SLING_SERVLET_PATHS + "=/bin/loadBlogJson",
                 ServletResolverConstants.SLING_SERVLET_METHODS + "=GET"
         }
 )
@@ -29,29 +29,24 @@ public class ReadBlogJsonServlet extends SlingSafeMethodsServlet {
             SlingHttpServletResponse response)
             throws IOException {
 
-        response.setContentType("application/json");
+        response.setContentType("text/plain");
 
         try {
 
+
             if (GlobalObject.BlogRootObject != null) {
-
-                ObjectMapper mapper = new ObjectMapper();
-
-                response.getWriter().write(
-                        mapper.writeValueAsString(
-                                GlobalObject.BlogRootObject.getPages()
-                        )
-                );
+                response.setStatus(200);
+                response.getWriter().write("JSON_ALREADY_LOADED");
                 return;
             }
-
 
             Resource jsonResource =
                     request.getResourceResolver()
                             .getResource("/content/dam/blogging/blogData.json");
 
             if (jsonResource == null) {
-                response.getWriter().write("{\"error\":\"JSON not found\"}");
+                response.setStatus(404);
+                response.getWriter().write("JSON_NOT_FOUND");
                 return;
             }
 
@@ -59,15 +54,16 @@ public class ReadBlogJsonServlet extends SlingSafeMethodsServlet {
                     jsonResource.getChild("jcr:content/renditions/original");
 
             if (original == null) {
-                response.getWriter().write("{\"error\":\"Original rendition missing\"}");
+                response.setStatus(500);
+                response.getWriter().write("ORIGINAL_RENDITION_MISSING");
                 return;
             }
-
 
             try (InputStream is = original.adaptTo(InputStream.class)) {
 
                 if (is == null) {
-                    response.getWriter().write("{\"error\":\"InputStream null\"}");
+                    response.setStatus(500);
+                    response.getWriter().write("STREAM_NULL");
                     return;
                 }
 
@@ -76,18 +72,16 @@ public class ReadBlogJsonServlet extends SlingSafeMethodsServlet {
                 BlogRoot root =
                         mapper.readValue(is, BlogRoot.class);
 
-
                 GlobalObject.BlogRootObject = root;
-
-                response.getWriter().write(
-                        mapper.writeValueAsString(root.getPages())
-                );
             }
 
+            response.setStatus(200);
+            response.getWriter().write("SUCCESS");
+
         } catch (Exception e) {
-            response.getWriter().write(
-                    "{\"error\":\"" + e.getMessage() + "\"}"
-            );
+
+            response.setStatus(500);
+            response.getWriter().write("FAILED");
         }
     }
 }
