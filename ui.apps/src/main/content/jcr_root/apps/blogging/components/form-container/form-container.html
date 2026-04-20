@@ -1,0 +1,21 @@
+<div class="custom-form">
+    <form id="myForm">
+        <div data-sly-resource="${resource @ resourceType='wcm/foundation/components/responsivegrid'}"></div>
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('myForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var data = new FormData(e.target);
+        var params = new URLSearchParams(data).toString();
+        fetch('/bin/submitForm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+        })
+            .then(function(r) { return r.text(); })
+            .then(function(msg) { alert(msg); });
+    });
+</script>

@@ -29,4 +29,23 @@ public class BlogPage {
     public String getAuthorBio() {
         return authorBio;
     }
+    public void setPageName(String pageName) {
+        this.pageName = pageName;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
+
+    public void setAuthorBio(String authorBio) {
+        this.authorBio = authorBio;
+    }
 }
